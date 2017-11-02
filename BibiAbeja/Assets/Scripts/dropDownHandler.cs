@@ -46,7 +46,9 @@ public class dropDownHandler : MonoBehaviour {
                 break;
    
         }
-        SceneManager.LoadScene("paso 1");
+
+
+        SceneManager.LoadScene("paso "+ EstadoJuego.estadoJuego.nivel);
     }
 
     private void OneChanged(int newPosition)

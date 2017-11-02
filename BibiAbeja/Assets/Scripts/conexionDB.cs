@@ -74,7 +74,7 @@ public class conexionDB  {
 
     }
 
-    public List<String> obtenerPalabras(string tema, int nivel)
+    public List<String> obtenerPalabras(string tema)
     {
 
         List<String> palabras= new List<String>();
@@ -84,7 +84,7 @@ public class conexionDB  {
         dbconn.Open(); //Open connection to the database.
 
         IDbCommand dbcmd = dbconn.CreateCommand();
-        string sqlQuery = "select nombre from Palabras where nivel=" +nivel+" AND tema='"+tema+"'";
+        string sqlQuery = "select nombre from Palabras where  tema='"+tema+"'";
         dbcmd.CommandText = sqlQuery;
         IDataReader reader = dbcmd.ExecuteReader();
         while (reader.Read())
@@ -277,5 +277,27 @@ public class conexionDB  {
 
     }
 
+    public String obtenerSilabasPalabra(string palabra)
+    {
+        IDbConnection dbconn;
+        dbconn = (IDbConnection)new SqliteConnection(conn);
 
+        dbconn.Open(); //Open connection to the database.
+
+        IDbCommand dbcmd = dbconn.CreateCommand();
+        string sqlQuery = "select silabas from Palabras where nombre='" + palabra + "'";
+        dbcmd.CommandText = sqlQuery;
+        IDataReader reader = dbcmd.ExecuteReader();
+        while (reader.Read())
+        {
+            palabra = reader.GetString(0);
+        }
+        reader.Close();
+        reader = null;
+        dbcmd.Dispose();
+        dbcmd = null;
+        dbconn.Close();
+        dbconn = null;
+        return palabra;
+    }
 }

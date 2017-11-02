@@ -18,11 +18,13 @@ public class HandCursor : MonoBehaviour
     private PXCMCursorData.GestureData gestureData;
     private PXCMPoint3DF32 adaptivePoints;
     private PXCMPoint3DF32 coordinates2d;
+    private Ray ray;
+    private RaycastHit hit;
+    private bool isCursorPen = true;
+    private bool isCursorSyllable = false;
+    private bool llamarCorutina = true;
+    private EstadoJuego estadoJuego;
 
-
-    //public List<Rect> linea;
-    //public Material punto = new Material(Shader.Find("Unlit/Color"));
-    //public Texture2D puntoImage;
     public Texture2D cursorImage;
     public Vector3 mousePos;
     public bool click;
@@ -31,10 +33,16 @@ public class HandCursor : MonoBehaviour
     public static event JugadorEmpiezaDibujar Contacto;
     public Vector3 v3 = new Vector3();
     public bool primeraVez = true;
+    public string pasoNombre;
+
+    public string silabaAgarrada;
+    public string[] silabas;
+    public int tamanioSilabas;
+    public int aciertosSilabas = 0;
+    public string txtPalabra;
 
     // variable para mantener conteo de un segundo en el juego
     public float tiempo;
-
 
     private void Awake()
     {
@@ -47,14 +55,39 @@ public class HandCursor : MonoBehaviour
         {
             Destroy(gameObject);
         }
-        cursorImage = Resources.Load("Textures/pen", typeof(Texture2D)) as Texture2D;
+        pasoNombre = SceneManager.GetActiveScene().name;
+        if (pasoNombre == "paso 3")
+        {
+            // Se obtienen la palabra que se está jugando actualmente y el componente estado juego
+            txtPalabra = EstadoJuego.estadoJuego.palabra;
+            estadoJuego = EstadoJuego.estadoJuego;
+            // Se inicia el arreglo de sílabas al tamaño necesario con sus sílabas necesarias
+            silabas = estadoJuego.obtenerSilabasPalabra(txtPalabra);
+            tamanioSilabas = silabas.Length;
+            Debug.Log("Palabra que se está jugando actualmente: " + txtPalabra);
+            Debug.Log("Valor de estado juego: " + estadoJuego);
+            for (int i = 0; i < tamanioSilabas; i++)
+            {
+                Debug.Log("Arreglo de sílabas: " + silabas[i].ToString());
+            }
+            Debug.Log("Tamaño de sílabas: " + tamanioSilabas);
+            // Se asigna la imagen al cursor principal
+            cursorImage = Resources.Load("Textures/pen", typeof(Texture2D)) as Texture2D;
+            // Se reparten todas las piezas del tablero
+            repartirPiezas();
+            // Se reproduce el sonido acorde a la palabra en juego
+            Debug.Log("Intentando hacer un sonido de: " + txtPalabra);
+            AudioClip sonido;
+            sonido = Resources.Load("Sonidos/Figuras/" + txtPalabra, typeof(AudioClip)) as AudioClip;
+
+            Debug.Log(GameObject.Find("sonido").GetComponent<AudioSource>().name);
+            GameObject.Find("sonido").GetComponent<AudioSource>().PlayOneShot(sonido);
+        }
     }
 
 
     private void Start()
     {
-        //linea = new List<Rect>();
-        //Time.timeScale = 1;
         ConfigureRealSense();
         Update();
     }
@@ -173,9 +206,6 @@ public class HandCursor : MonoBehaviour
         yield return null;
     }
 
-    Ray ray;
-    RaycastHit hit;
-
     void OnGUI()
     {
         //mousePos = Camera.main.ScreenToWorldPoint(v3);
@@ -189,10 +219,8 @@ public class HandCursor : MonoBehaviour
         if (Physics.Raycast(ray, out hit))
         {
             // Acciones a ejecutar para la escena del paso 1
-            if (SceneManager.GetActiveScene().name == "paso 1")
+            if (pasoNombre == "paso 1")
             {
-                Debug.Log("Paso 1 krnal");
-
                 if (hit.collider.tag == "salir")
                 {
                     SceneManager.LoadScene("eligeTema");
@@ -216,7 +244,7 @@ public class HandCursor : MonoBehaviour
             }
 
             // Acciones a ejecutar para la escena del paso 3
-            if (SceneManager.GetActiveScene().name == "paso 3")
+            if (pasoNombre == "paso 3")
             {
                 if (hit.collider != null)
                 {
@@ -249,7 +277,6 @@ public class HandCursor : MonoBehaviour
                     {
                         if (isCursorSyllable)
                         {
-                            //StartCoroutine("colocarPieza");
                             if (llamarCorutina)
                             {
                                 colocar_pieza();
@@ -262,11 +289,58 @@ public class HandCursor : MonoBehaviour
         }
     }
 
-    bool isCursorPen = true;
-    bool isCursorSyllable = false;
-    bool llamarCorutina = true;
+    public void repartirPiezas()
+    {
+        // Se declara un arreglo de sprites para guardar las imagenes a cargar
+        Sprite[] arregloSprites = new Sprite[5];
+        string[] piezasAlAzar = { "cu", "trian", "tan", "es", "cua" };
+        // Se itera cuantas veces se necesite para llenar el tamaño de sílabas posibles
+        for (int i = 0; i < 5; i++)
+        {
+            // Primero se añaden las piezas que corresponden
+            if (i < tamanioSilabas)
+            {
+                arregloSprites[i] = (Resources.Load("Sprites/" + silabas[i].ToString(), typeof(Sprite)) as Sprite);
+            }
+            // Si se requieren menos espacios de los máximos, se llenan los espacios disponibles con piezas al azar
+            else if (i >= tamanioSilabas && i < 5)
+            {
+                int random = UnityEngine.Random.Range(0, 4);
+                arregloSprites[i] = (Resources.Load("Sprites/" + piezasAlAzar[random].ToString(), typeof(Sprite)) as Sprite);
+            }
+        }
+        // Se crea una lista de índices para cargar al azar los índices de los espacios en blanco
+        List<int> espacioIndices = new List<int>();
+        espacioIndices.AddRange(new int[] { 1, 2, 3, 4, 5 });
+        // Se cargan los sprites dentro de las piezas necesitadas
+        for (int i = 0; i < 5; i++)
+        {
+            // Si no hay elementos nulos, se establecen los espacios vacíos al valor del sprite en la escena
+            if (arregloSprites[i] != null)
+            {
+                // Se busca un índice entre 1 y 5
+                int num = UnityEngine.Random.Range(0, espacioIndices.Count);
+                // Se establece ese número al azar como el índice para buscar en el arreglo de sprites
+                int indice = espacioIndices[num];
+                // Se encuentra el espacio en blanco para poner un sprite en la pieza de acuerdo a los valores al azar de 1 a 5
+                GameObject espacio = GameObject.Find("SilabaLetras" + indice);
+                // Se establece el sprite encontrado en la pieza vacía encontrada
+                SpriteRenderer imagenSilaba = espacio.GetComponent<SpriteRenderer>();
+                imagenSilaba.sprite = arregloSprites[i];
+                //Por último se elimina el índice que ya usamos una vez de las posibles variables índice que se pueden elegir
+                espacioIndices.Remove(indice);
+            }
+        }
 
-    string silabaAgarrada;
+        // Se desactivan los espacios para fichas que no son necesarios
+        int espaciosDesactivables = 5 - tamanioSilabas; int x = 5; // Variables para manejar los espacios a desactivar y los nombres de estos Ej: SilabaEspacio5
+        for (int i = 0; i < espaciosDesactivables; i++)
+        {
+            string nombre = "SilabaEspacio" + x.ToString();
+            GameObject.Find(nombre).SetActive(false);
+            x--;
+        }
+    }
 
     public void agarrar_pieza()
     {
@@ -286,11 +360,9 @@ public class HandCursor : MonoBehaviour
             }
 
             ray = Camera.main.ScreenPointToRay(mousePos);
-            Debug.Log("Physics.Raycast y su valor: " + Physics.Raycast(ray, out hit));
+
             if (Physics.Raycast(ray, out hit))
             {
-                Debug.Log("Intentando detectar la colisión con el espacio de la sílaba");
-                Debug.Log(hit.transform.gameObject.name);
                 if (hit.transform.gameObject != null)
                 {
                     // Se obtiene el objeto al que toca el Raycast
@@ -305,7 +377,9 @@ public class HandCursor : MonoBehaviour
                     // Atributos de semáforo cambian de estado
                     isCursorPen = false;
                     isCursorSyllable = true;
-                    llamarCorutina = true;
+                    //llamarCorutina = true;
+
+                    StartCoroutine("tiempoLibre");
 
                     // Se desactiva la imagen de la sílaba que se agarró con el cursor
                     objetoSilaba.GetComponent<SpriteRenderer>().sprite = null;
@@ -328,6 +402,7 @@ public class HandCursor : MonoBehaviour
         StartCoroutine("colocarPieza");
     }
 
+    int terminar = 0;
     IEnumerator colocarPieza()
     {
         if (isCursorSyllable)
@@ -341,27 +416,49 @@ public class HandCursor : MonoBehaviour
 
             }
             ray = Camera.main.ScreenPointToRay(mousePos);
-            Debug.Log("Physics.Raycast y su valor: " + Physics.Raycast(ray, out hit));
+
             if (Physics.Raycast(ray, out hit))
             {
-                Debug.Log("Intentando detectar la colisión con el espacio vacío");
-                Debug.Log(hit.transform.gameObject.name);
                 if (hit.transform.gameObject != null)
                 {
                     Debug.Log("Intentando dejar la pieza en el lugar seleccionado");
 
                     // Se obtiene el GameObject del espacio vacío, después se coloca la pieza del cursor sobre él
                     GameObject espacioVacio = hit.transform.gameObject;
-                    SpriteRenderer imagenSilaba = espacioVacio.GetComponent<SpriteRenderer>();
-                    imagenSilaba.sprite = Resources.Load("Sprites/" + silabaAgarrada, typeof(Sprite)) as Sprite;
 
-                    // Una vez colocada la pieza en su lugar, se devuelve al cursor la imagen de la pluma
-                    cursorImage = Resources.Load("Textures/pen", typeof(Texture2D)) as Texture2D;
+                    int indice = int.Parse(espacioVacio.name.Substring(13));
+                    indice -= 1;
+                    Debug.Log("Indice agarrado: " + indice);
+                    if (silabas[indice].Equals(silabaAgarrada))
+                    {
+                        Debug.Log("Silaba agarrada: " + silabaAgarrada);
+                        Debug.Log("Silaba referenciada: " + silabas[indice]);
+                        SpriteRenderer imagenSilaba = espacioVacio.GetComponent<SpriteRenderer>();
+                        imagenSilaba.sprite = Resources.Load("Sprites/" + silabaAgarrada, typeof(Sprite)) as Sprite;
 
-                    // Atributos de semáforo cambian de estado
-                    isCursorPen = true;
-                    isCursorSyllable = false;
-                    llamarCorutina = true;
+                        // Una vez colocada la pieza en su lugar, se devuelve al cursor la imagen de la pluma
+                        cursorImage = Resources.Load("Textures/pen", typeof(Texture2D)) as Texture2D;
+
+                        // Se aumentan los aciertos para saber cuándo terminará el ejercicio
+                        aciertosSilabas++;
+
+                        // Atributos de semáforo cambian de estado
+                        isCursorPen = true;
+                        isCursorSyllable = false;
+                        //llamarCorutina = true;
+
+                        StartCoroutine("tiempoLibre");
+
+                        Debug.Log("Tamaño de aciertosSilabas: " + aciertosSilabas + ". Tamaño de tamanioSilabas: " + tamanioSilabas);
+                        if (aciertosSilabas == tamanioSilabas)
+                            ganar();
+                        else
+                            Debug.Log("Aún no has ganado, TÍO o TÍA");
+                    }
+                    else
+                    {
+                        llamarCorutina = true;
+                    }
                 }
             }
             else
@@ -392,11 +489,9 @@ public class HandCursor : MonoBehaviour
 
         }
         ray = Camera.main.ScreenPointToRay(mousePos);
-        Debug.Log("Physics.Raycast y su valor: " + Physics.Raycast(ray, out hit));
+
         if (Physics.Raycast(ray, out hit))
         {
-            Debug.Log("Intentando detectar la colisión con el espacio vacío");
-            Debug.Log(hit.transform.gameObject.name);
             if (hit.transform.gameObject != null)
             {
                 Debug.Log("Intentando dejar la pieza agarrada en un lugar del tablero de piezas");
@@ -411,7 +506,8 @@ public class HandCursor : MonoBehaviour
                 // Atributos de semáforo cambian de estado
                 isCursorPen = true;
                 isCursorSyllable = false;
-                llamarCorutina = true;
+                //llamarCorutina = true;
+                StartCoroutine("tiempoLibre");
             }
         }
         else
@@ -421,9 +517,59 @@ public class HandCursor : MonoBehaviour
         yield return null;
     }
 
-    public void mostrarError(int windowID)
+    IEnumerator tiempoLibre()
     {
-        if (GUI.Button(new Rect(10, 20, 100, 20), "Hello World"))
+        float tiempoDeEspera = 2.0f;
+        while (tiempoDeEspera > 0)
+        {
+            Debug.Log("Tiempo de espera para una nueva acción del cursor: " + tiempoDeEspera);
+            Debug.Log("Valor de llamarCorutina: " + llamarCorutina);
+            yield return new WaitForSeconds(1);
+            tiempoDeEspera--;
+
+        }
+        llamarCorutina = true;
+        yield return null;
+    }
+
+    public void ganar()
+    {
+        //int ha = GameObject.Find("PanelSilabaEspacios").GetComponents<GameObject>().Length;
+        //GameObject[] go = GameObject.Find("PanelSilabasEspacios").GetComponentsInChildren<GameObject>();
+        //int conteo = 0;
+        //int iterador = 0;
+        //foreach (GameObject i in go)
+        //{
+        //    if (i.GetComponent<SpriteRenderer>().sprite.name.ToString().Equals(silabas[iterador].ToString()))
+        //    {
+        //        conteo++;
+        //    }
+        //    iterador++;
+        //}
+
+        //if (conteo == tamanioSilabas)
+        //{
+        //    string palabraEnJuego = GameObject.Find("txtPalabra").GetComponent<Text>().text;
+        //    string palabraFormada = GameObject.Find("SilabaEspacio1").GetComponent<SpriteRenderer>().sprite.name +
+        //                            GameObject.Find("SilabaEspacio2").GetComponent<SpriteRenderer>().sprite.name +
+        //                            GameObject.Find("SilabaEspacio3").GetComponent<SpriteRenderer>().sprite.name;
+        //    Debug.Log("Imprimiento las partes que conforman a la palabra formada: 1 - " + GameObject.Find("SilabaEspacio1").GetComponent<SpriteRenderer>().sprite.name);
+        //    Debug.Log("Imprimiento las partes que conforman a la palabra formada: 2 - " + GameObject.Find("SilabaEspacio2").GetComponent<SpriteRenderer>().sprite.name);
+        //    Debug.Log("Imprimiento las partes que conforman a la palabra formada: 3 - " + GameObject.Find("SilabaEspacio3").GetComponent<SpriteRenderer>().sprite.name);
+        //    Debug.Log("Imprimiento palabra formada" + palabraFormada);
+        //    if (palabraEnJuego == palabraFormada)
+        //        Debug.Log("Has ganado TÍO o TÍA");
+        //    else
+        //        Debug.Log("No has ganado TÍO o TÍA");
+        //}
+        Debug.Log("Has ganado TÍO o TÍA");
+    }
+
+
+
+    public void mostrarVentana(int windowID)
+    {
+        if (GUI.Button(new Rect(10, 20, 100, 20), "Wuuu terminaste!"))
             print("Got a click");
     }
 }

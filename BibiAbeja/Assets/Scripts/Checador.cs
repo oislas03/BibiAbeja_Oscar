@@ -125,7 +125,6 @@ public class Checador : MonoBehaviour
         //    GameObject.Find(palabra).GetComponent<SpriteRenderer>().transform.localScale = pos;
         //  GameObject.Find(palabra).GetComponent<Transform>().position= posicion;
         // GameObject.Find("kk").GetComponent<BoxCollider>().size = (GameObject.Find(palabra).GetComponent<SpriteRenderer>().bounds.size);
-        UnityEngine.Debug.Log("KAKAKAAAAAAA" + GameObject.Find("colisionador").GetComponent<Transform>().transform.localScale);
 
         datosF = figura.GetComponent<datos>();
 
@@ -577,8 +576,4 @@ public class Checador : MonoBehaviour
     {
         HandCursor.Contacto -= SeHizoContacto;
     }
-
-
-
-
 }

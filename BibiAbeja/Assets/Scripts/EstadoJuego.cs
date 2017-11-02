@@ -69,12 +69,11 @@ public class EstadoJuego : MonoBehaviour {
             GameObject.Find("txtNivel").GetComponent<Text>().text = "Nivel " + nivel;
             cargarMenus();
         }
-        else if (nameScene.Equals("paso 1"))
+        else if (nameScene.Equals("paso 1") || nameScene.Equals("paso 2") || nameScene.Equals("paso 3") || nameScene.Equals("paso 4"))
         {
             string nombre = ActivePlayer.name.ToString();
             GameObject.Find("txtPalabra").GetComponent<Text>().text = this.palabra;
             GameObject.Find("nNino").GetComponent<Text>().text = nombre;
-
 
         }
 
@@ -203,7 +202,7 @@ public class EstadoJuego : MonoBehaviour {
     public void cargarLista(string tema, Dropdown miMenu)
     {
 
-        List<string>Palabras = conexion.obtenerPalabras(tema, this.nivel);
+        List<string>Palabras = conexion.obtenerPalabras(tema);
         miMenu.options.Clear();
         miMenu.options.Add(new Dropdown.OptionData() { text = "Ninguno" });
 
@@ -238,7 +237,7 @@ public class EstadoJuego : MonoBehaviour {
 
     public List<string> obtenerPalabrasTema()
     {
-        return conexion.obtenerPalabras(this.tema, this.nivel);
+        return conexion.obtenerPalabras(this.tema);
    
 
     }
@@ -274,7 +273,7 @@ public class EstadoJuego : MonoBehaviour {
 
     public void setTema(string tema)
     {
-        this.Palabras= conexion.obtenerPalabras(tema, this.nivel);
+        this.Palabras= conexion.obtenerPalabras(tema);
         this.tema =tema;
     }
 
@@ -283,7 +282,17 @@ public class EstadoJuego : MonoBehaviour {
         this.palabra = palabra;
     }
 
+    public String[] obtenerSilabasPalabra(String palabra)
+    {
+        String npalabra = conexion.obtenerSilabasPalabra(palabra);
+        npalabra.IndexOf(" ", 0);
 
+        String[] silabas = new String[npalabra.Split(" "[0]).Length];
+        silabas = npalabra.Split(" "[0]);
+
+
+        return silabas;
+    }
 }
 
 [System.Serializable]

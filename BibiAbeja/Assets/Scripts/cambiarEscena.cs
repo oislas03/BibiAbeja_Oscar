@@ -55,7 +55,7 @@ public class cambiarEscena : MonoBehaviour {
         }
        else  if (nameScene.Equals("seleccionarUsuario"))
         {
-            sceneName = btnName.Equals("btnNuevo") ? "escribirNombre" : btnName.Equals("btnSalir") ?"Main":"eligeTema";
+            sceneName = btnName.Equals("btnNuevo") ? "escribirNombre" : btnName.Equals("btnSalir") ?"Main": btnName.Equals("btnCargar")? "eligeNivel" : "Main";
             
             SceneManager.LoadScene(sceneName);
 
