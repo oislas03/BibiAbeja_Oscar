@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class changeImg : MonoBehaviour {
 
@@ -13,8 +14,10 @@ public class changeImg : MonoBehaviour {
 		
 	}
 
-   public void colocarImagen(string path)
+    public void colocarImagen(string path)
     {
-        gameObject.GetComponent<SpriteRenderer>().sprite = Resources.Load(path, typeof(Sprite)) as Sprite;
+        gameObject.GetComponent<Image>().sprite = Resources.Load(path, typeof(Sprite)) as Sprite;
+     //   Vector3 pos = new Vector3(-109.4F,-62.019F,0);
+     //   gameObject.GetComponent<RectTransform>().position= pos;
     }
 }

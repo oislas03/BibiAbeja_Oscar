@@ -21,9 +21,16 @@ public class EstadoJuego : MonoBehaviour {
     public Boolean exitoso;
     public string path = "";
     public PNGUploader uploader;
-    
+
+
+    private int numIntentosActual;
+    private int numIntentos;
+
 
     public conexionDB conexion;
+
+    public int NumIntentosActual { get { return numIntentosActual; } set { numIntentosActual = value; } }
+    public int NumIntentos { get { return numIntentos; } set { numIntentos = value; } }
 
     void Awake () {
 
@@ -93,15 +100,18 @@ public class EstadoJuego : MonoBehaviour {
         //this.palabra = "cuadrado";
 
         int indiceM = conexion.obtenerIndiceMaximo(this.ActivePlayer.id, this.palabra);
-        this.path = this.ActivePlayer.id + "_" + this.palabra + "_" + (indiceM+1) + ".png";
+        this.path = nivel<=2?this.ActivePlayer.id + "_" + this.palabra + "_" + (indiceM+1) + ".png":"";
         Debug.Log(this.ActivePlayer.id + this.palabra + duracion + path + exitoso);
 
         int playerActive = ActivePlayer.id;
 
-        //    uploader.UploadPNG(path);
-        conexion.guardarIntento(this.ActivePlayer.id, this.palabra, duracion, path, exitoso);
+        conexion.guardarIntento(this.ActivePlayer.id, this.palabra, duracion, path, exitoso, this.nivel);
 
-        uploader.StartCoroutine("UploadPNG");
+        if (nivel == 1 || nivel == 2) {
+            uploader.StartCoroutine("UploadPNG");
+
+
+        }
 
     }
 

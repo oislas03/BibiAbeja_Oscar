@@ -24,6 +24,7 @@ public class HandCursor : MonoBehaviour
     private bool isCursorSyllable = false;
     private bool llamarCorutina = true;
     private EstadoJuego estadoJuego;
+    private float tiempoDeJuego = 0;
 
     public Texture2D cursorImage;
     public Vector3 mousePos;
@@ -75,19 +76,22 @@ public class HandCursor : MonoBehaviour
             cursorImage = Resources.Load("Textures/pen", typeof(Texture2D)) as Texture2D;
             // Se reparten todas las piezas del tablero
             repartirPiezas();
+
             // Se reproduce el sonido acorde a la palabra en juego
             Debug.Log("Intentando hacer un sonido de: " + txtPalabra);
-            AudioClip sonido;
-            sonido = Resources.Load("Sonidos/Figuras/" + txtPalabra, typeof(AudioClip)) as AudioClip;
-
-            Debug.Log(GameObject.Find("sonido").GetComponent<AudioSource>().name);
-            GameObject.Find("sonido").GetComponent<AudioSource>().PlayOneShot(sonido);
+            AudioClip audioClip;
+            audioClip = Resources.Load("Sonidos/Figuras/" + txtPalabra, typeof(AudioClip)) as AudioClip;
+            AudioSource sonido = GameObject.Find("sonido").GetComponent<AudioSource>();
+            reproducirSonido(sonido, audioClip);
+            GameObject.Find("btnAudio").GetComponent<AudioSource>().clip = audioClip;
         }
     }
 
 
     private void Start()
     {
+        Time.timeScale = 1;
+        tiempoDeJuego += Time.deltaTime;
         ConfigureRealSense();
         Update();
     }
@@ -126,6 +130,7 @@ public class HandCursor : MonoBehaviour
 
     private void Update()
     {
+        tiempoDeJuego += Time.deltaTime;
         StartCoroutine("toUpdate");
     }
 
@@ -421,18 +426,13 @@ public class HandCursor : MonoBehaviour
             {
                 if (hit.transform.gameObject != null)
                 {
-                    Debug.Log("Intentando dejar la pieza en el lugar seleccionado");
-
                     // Se obtiene el GameObject del espacio vacío, después se coloca la pieza del cursor sobre él
                     GameObject espacioVacio = hit.transform.gameObject;
 
                     int indice = int.Parse(espacioVacio.name.Substring(13));
                     indice -= 1;
-                    Debug.Log("Indice agarrado: " + indice);
                     if (silabas[indice].Equals(silabaAgarrada))
                     {
-                        Debug.Log("Silaba agarrada: " + silabaAgarrada);
-                        Debug.Log("Silaba referenciada: " + silabas[indice]);
                         SpriteRenderer imagenSilaba = espacioVacio.GetComponent<SpriteRenderer>();
                         imagenSilaba.sprite = Resources.Load("Sprites/" + silabaAgarrada, typeof(Sprite)) as Sprite;
 
@@ -449,11 +449,10 @@ public class HandCursor : MonoBehaviour
 
                         StartCoroutine("tiempoLibre");
 
-                        Debug.Log("Tamaño de aciertosSilabas: " + aciertosSilabas + ". Tamaño de tamanioSilabas: " + tamanioSilabas);
                         if (aciertosSilabas == tamanioSilabas)
                             ganar();
                         else
-                            Debug.Log("Aún no has ganado, TÍO o TÍA");
+                            Debug.Log("Aún no has ganado");
                     }
                     else
                     {
@@ -494,8 +493,6 @@ public class HandCursor : MonoBehaviour
         {
             if (hit.transform.gameObject != null)
             {
-                Debug.Log("Intentando dejar la pieza agarrada en un lugar del tablero de piezas");
-
                 // Se obtiene el GameObject del espacio vacío, después se coloca la pieza del cursor sobre él
                 GameObject espacioVacio = hit.transform.gameObject;
                 SpriteRenderer imagenSilaba = espacioVacio.GetComponent<SpriteRenderer>();
@@ -503,6 +500,7 @@ public class HandCursor : MonoBehaviour
 
                 // Una vez colocada la pieza en su lugar, se devuelve al cursor la imagen de la pluma
                 cursorImage = Resources.Load("Textures/pen", typeof(Texture2D)) as Texture2D;
+
                 // Atributos de semáforo cambian de estado
                 isCursorPen = true;
                 isCursorSyllable = false;
@@ -523,7 +521,6 @@ public class HandCursor : MonoBehaviour
         while (tiempoDeEspera > 0)
         {
             Debug.Log("Tiempo de espera para una nueva acción del cursor: " + tiempoDeEspera);
-            Debug.Log("Valor de llamarCorutina: " + llamarCorutina);
             yield return new WaitForSeconds(1);
             tiempoDeEspera--;
 
@@ -534,42 +531,13 @@ public class HandCursor : MonoBehaviour
 
     public void ganar()
     {
-        //int ha = GameObject.Find("PanelSilabaEspacios").GetComponents<GameObject>().Length;
-        //GameObject[] go = GameObject.Find("PanelSilabasEspacios").GetComponentsInChildren<GameObject>();
-        //int conteo = 0;
-        //int iterador = 0;
-        //foreach (GameObject i in go)
-        //{
-        //    if (i.GetComponent<SpriteRenderer>().sprite.name.ToString().Equals(silabas[iterador].ToString()))
-        //    {
-        //        conteo++;
-        //    }
-        //    iterador++;
-        //}
-
-        //if (conteo == tamanioSilabas)
-        //{
-        //    string palabraEnJuego = GameObject.Find("txtPalabra").GetComponent<Text>().text;
-        //    string palabraFormada = GameObject.Find("SilabaEspacio1").GetComponent<SpriteRenderer>().sprite.name +
-        //                            GameObject.Find("SilabaEspacio2").GetComponent<SpriteRenderer>().sprite.name +
-        //                            GameObject.Find("SilabaEspacio3").GetComponent<SpriteRenderer>().sprite.name;
-        //    Debug.Log("Imprimiento las partes que conforman a la palabra formada: 1 - " + GameObject.Find("SilabaEspacio1").GetComponent<SpriteRenderer>().sprite.name);
-        //    Debug.Log("Imprimiento las partes que conforman a la palabra formada: 2 - " + GameObject.Find("SilabaEspacio2").GetComponent<SpriteRenderer>().sprite.name);
-        //    Debug.Log("Imprimiento las partes que conforman a la palabra formada: 3 - " + GameObject.Find("SilabaEspacio3").GetComponent<SpriteRenderer>().sprite.name);
-        //    Debug.Log("Imprimiento palabra formada" + palabraFormada);
-        //    if (palabraEnJuego == palabraFormada)
-        //        Debug.Log("Has ganado TÍO o TÍA");
-        //    else
-        //        Debug.Log("No has ganado TÍO o TÍA");
-        //}
-        Debug.Log("Has ganado TÍO o TÍA");
+        Debug.Log("Has ganado " + tiempoDeJuego.ToString());
+        EstadoJuego.estadoJuego.registrarIntento(tiempoDeJuego, 1);
     }
 
-
-
-    public void mostrarVentana(int windowID)
+    public void reproducirSonido(AudioSource sonido, AudioClip audioClip)
     {
-        if (GUI.Button(new Rect(10, 20, 100, 20), "Wuuu terminaste!"))
-            print("Got a click");
+        sonido.clip = audioClip;
+        sonido.Play();
     }
 }

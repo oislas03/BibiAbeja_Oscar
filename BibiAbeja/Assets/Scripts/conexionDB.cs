@@ -257,7 +257,7 @@ public class conexionDB  {
     }
 
 
-    public void guardarIntento(int idUsuario,string palabra,float duracion, string path, int exitoso)
+    public void guardarIntento(int idUsuario,string palabra,float duracion, string path, int exitoso, int nivel)
     {
 
         IDbConnection dbconn;
@@ -267,7 +267,7 @@ public class conexionDB  {
         dbconn.Open(); //Open connection to the database.
 
         IDbCommand dbcmd = dbconn.CreateCommand();
-        string sqlQuery = "insert into Intentos (idUsuario, timestamp, tiempoDuracion, trazoPath, palabra, exitoso) VALUES ("+idUsuario+",'"+fecha+"',"+duracion+",'"+path+"','"+palabra+"',"+exitoso+")"; // FIXED
+        string sqlQuery = "insert into Intentos (idUsuario, timestamp, tiempoDuracion, trazoPath, palabra, exitoso, nivel) VALUES ("+idUsuario+",'"+fecha+"',"+duracion+",'"+path+"','"+palabra+"',"+exitoso+"," + nivel + ")"; // FIXED
         dbcmd.CommandText = sqlQuery;
         dbcmd.ExecuteNonQuery();
         dbcmd.Dispose();

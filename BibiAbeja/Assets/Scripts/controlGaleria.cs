@@ -12,12 +12,14 @@ using UnityEngine.UI;
 public class controlGaleria : MonoBehaviour
 {
 
-    public changeImg[] imagenes = new changeImg[4];
 
     List<string> nombreImagenes = new List<string>();
     public string[] paths = new string[4];
 
+    public changeImg imgg = new changeImg();
     List<Imagen> imagenesObj = new List<Imagen>();
+    int indice = 1;
+    int count = 10;
 
     string nombreActivo = "";
 
@@ -48,31 +50,64 @@ public class controlGaleria : MonoBehaviour
 
 
     public void CambiarImagenIzq() {
+        Debug.Log("indice" + indice);
+
 
         int i = nombreImagenes.IndexOf(nombreActivo);
 
-        if ((i + 1) < nombreImagenes.Count) {
-            this.nombreActivo = nombreImagenes[i + 1];
+         
+        if (indice < count )
+        {
+            indice += 1;
 
             ponerImagen();
 
         }
+        else {
+            indice = 1;
+            if ((i + 1) < nombreImagenes.Count)
+            {
+                this.nombreActivo = nombreImagenes[i + 1];
+
+                ponerImagen();
+
+            }
+
+        }
+
+       
     }
 
 
 
     public void CambiarImagenDerecha ()
     {
+        Debug.Log("indice" + indice);
+
 
         int i = nombreImagenes.IndexOf(nombreActivo);
 
-        if ((i ) < nombreImagenes.Count&& i>0)
+
+        if (indice <= count&&indice>0)
         {
-            this.nombreActivo = nombreImagenes[i - 1];
+            indice -= 1;
 
             ponerImagen();
 
         }
+        else
+        {
+            indice = 4;
+            if ((i) < nombreImagenes.Count && i > 0)
+            {
+                this.nombreActivo = nombreImagenes[i - 1];
+
+                ponerImagen();
+
+            }
+        }
+
+       
     } 
 
     public void ponerImagen() {
@@ -81,13 +116,7 @@ public class controlGaleria : MonoBehaviour
         GameObject.Find("nNino").GetComponent<Text>().text = this.nombreActivo;
         sonido = Resources.Load<AudioClip>("Sonidos/Figuras/" + this.nombreActivo);
         GetComponent<AudioSource>().PlayOneShot(sonido);
-
-        imagenes[0].colocarImagen("");
-        imagenes[1].colocarImagen("");
-        imagenes[2].colocarImagen("");
-        imagenes[3].colocarImagen("");
-
-
+        count = 0;
 
         foreach (Imagen img in imagenesObj)
         {
@@ -95,22 +124,12 @@ public class controlGaleria : MonoBehaviour
             if (img.nombre.Equals(nombreActivo))
             {
 
-                string imgpath = img.path;
-                switch (img.numPart)
-                {
-                    case 1:
-                        imagenes[0].colocarImagen(img.path);
-                        break;
-                    case 2:
-                        imagenes[1].colocarImagen(img.path);
-                        break;
-                    case 3:
-                        imagenes[2].colocarImagen(img.path);
-                        break;
-                    case 4:
-                        imagenes[3].colocarImagen(img.path);
-                        break;
+                if (img.numPart == indice) {
+                    string imgpath = img.path;
+                    imgg.colocarImagen(img.path);
+                    
                 }
+                count++;
 
             }
 

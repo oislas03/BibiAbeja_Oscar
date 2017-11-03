@@ -42,6 +42,10 @@ public class ButtonClick : MonoBehaviour {
              GetComponent<AudioSource>().Play();
             Invoke("cargarEscena", GetComponent<AudioSource>().clip.length);
         }
+        else if (btnName == "btnAudio")
+        {
+            GameObject.Find("btnAudio").GetComponent<AudioSource>().Play();
+        }
 
     }
 
