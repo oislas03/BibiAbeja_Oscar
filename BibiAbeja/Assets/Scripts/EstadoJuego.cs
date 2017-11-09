@@ -79,9 +79,8 @@ public class EstadoJuego : MonoBehaviour {
         else if (nameScene.Equals("paso 1") || nameScene.Equals("paso 2") || nameScene.Equals("paso 3") || nameScene.Equals("paso 4"))
         {
             string nombre = ActivePlayer.name.ToString();
-            GameObject.Find("txtPalabra").GetComponent<Text>().text = this.palabra;
+            //GameObject.Find("txtPalabra").GetComponent<Text>().text = this.palabra;
             GameObject.Find("nNino").GetComponent<Text>().text = nombre;
-
         }
 
 

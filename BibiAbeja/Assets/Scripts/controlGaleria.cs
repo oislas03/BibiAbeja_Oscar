@@ -50,7 +50,6 @@ public class controlGaleria : MonoBehaviour
 
 
     public void CambiarImagenIzq() {
-        Debug.Log("indice" + indice);
 
 
         int i = nombreImagenes.IndexOf(nombreActivo);
@@ -58,6 +57,8 @@ public class controlGaleria : MonoBehaviour
          
         if (indice < count )
         {
+            Debug.Log("indice" + indice +"total: "+ count);
+
             indice += 1;
 
             ponerImagen();
@@ -125,6 +126,7 @@ public class controlGaleria : MonoBehaviour
             {
 
                 if (img.numPart == indice) {
+                    Debug.Log("imagen "+img.numPart);
                     string imgpath = img.path;
                     imgg.colocarImagen(img.path);
                     

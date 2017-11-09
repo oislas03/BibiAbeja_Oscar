@@ -25,6 +25,7 @@ public class HandCursor : MonoBehaviour
     private bool llamarCorutina = true;
     private EstadoJuego estadoJuego;
     private float tiempoDeJuego = 0;
+    private int terminar = 0;
 
     public Texture2D cursorImage;
     public Vector3 mousePos;
@@ -35,6 +36,8 @@ public class HandCursor : MonoBehaviour
     public Vector3 v3 = new Vector3();
     public bool primeraVez = true;
     public string pasoNombre;
+    public GameObject bordePanel;
+    public Texture2D[] manos = new Texture2D[4];
 
     public string silabaAgarrada;
     public string[] silabas;
@@ -73,7 +76,7 @@ public class HandCursor : MonoBehaviour
             }
             Debug.Log("Tamaño de sílabas: " + tamanioSilabas);
             // Se asigna la imagen al cursor principal
-            cursorImage = Resources.Load("Textures/pen", typeof(Texture2D)) as Texture2D;
+            cursorImage = Resources.Load("Textures/mano1", typeof(Texture2D)) as Texture2D;
             // Se reparten todas las piezas del tablero
             repartirPiezas();
 
@@ -84,6 +87,9 @@ public class HandCursor : MonoBehaviour
             AudioSource sonido = GameObject.Find("sonido").GetComponent<AudioSource>();
             reproducirSonido(sonido, audioClip);
             GameObject.Find("btnAudio").GetComponent<AudioSource>().clip = audioClip;
+
+            // Se esconde el botón de siguiente puesto que no tiene funcionalidad a la hora de iniciar el juego
+            GameObject.Find("btnSiguiente").gameObject.SetActive(false);
         }
     }
 
@@ -246,6 +252,28 @@ public class HandCursor : MonoBehaviour
                 {
                     GameObject.Find("DrawLine").GetComponent<DrawLine>().Dibujar(mousePos);
                 }
+            } else if(pasoNombre == "paso 2")
+            {
+                if (hit.collider.tag == "salir")
+                {
+                    SceneManager.LoadScene("eligeTema");
+                }
+                else if (hit.collider.tag == "punto")
+                {
+                    var nombre = hit.collider.gameObject.name;
+                    nombre = nombre.Substring(5);
+                    // Revisa que haya un objeto suscrito al evento
+                    if (Contacto != null)
+                    {
+                        // llama al evento del observador
+                        Contacto(nombre);
+                    }
+
+                }
+                if (hit.collider.tag == "areaDibujable")
+                {
+                    GameObject.Find("DrawLine").GetComponent<DrawLine>().Dibujar(mousePos);
+                }
             }
 
             // Acciones a ejecutar para la escena del paso 3
@@ -260,7 +288,6 @@ public class HandCursor : MonoBehaviour
                         //{
                         //}
                         //click = false;
-
                         if (hit.transform.gameObject.GetComponent<SpriteRenderer>().sprite == null)
                         {
                             if (llamarCorutina)
@@ -275,6 +302,10 @@ public class HandCursor : MonoBehaviour
                             {
                                 agarrar_pieza();
                                 llamarCorutina = false;
+                            }
+                            else
+                            {
+                                reproducirManoGif();
                             }
                         }
                     }
@@ -294,6 +325,11 @@ public class HandCursor : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Método que permite repartir las piezas al azar en el tablero de piezas, si las piezas necesarias no son iguales al tamaño máximo
+    /// de piezas posibles en el tablero, estos espacios se llenan con piezas al azar que no necesariamente corresponden a las piezas
+    /// correctas necesarias para ganar.
+    /// </summary>
     public void repartirPiezas()
     {
         // Se declara un arreglo de sprites para guardar las imagenes a cargar
@@ -347,11 +383,18 @@ public class HandCursor : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Corrutina que permite llamar al método de agarrarPieza.
+    /// </summary>
     public void agarrar_pieza()
     {
         StartCoroutine("agarrarPieza");
     }
 
+    /// <summary>
+    /// Método que permite agarrar una pieza con el cursor del tablero de piezas.
+    /// </summary>
+    /// <returns></returns>
     IEnumerator agarrarPieza()
     {
         if (isCursorPen)
@@ -402,12 +445,18 @@ public class HandCursor : MonoBehaviour
         yield return null;
     }
 
+    /// <summary>
+    /// Corrutina que permite llamar al método de colocarPieza.
+    /// </summary>
     public void colocar_pieza()
     {
         StartCoroutine("colocarPieza");
     }
-
-    int terminar = 0;
+    
+    /// <summary>
+    /// Método que permite colocar una pieza con el cursor dentro de los espacios vacíos en el pizarrón.
+    /// </summary>
+    /// <returns></returns>
     IEnumerator colocarPieza()
     {
         if (isCursorSyllable)
@@ -437,7 +486,7 @@ public class HandCursor : MonoBehaviour
                         imagenSilaba.sprite = Resources.Load("Sprites/" + silabaAgarrada, typeof(Sprite)) as Sprite;
 
                         // Una vez colocada la pieza en su lugar, se devuelve al cursor la imagen de la pluma
-                        cursorImage = Resources.Load("Textures/pen", typeof(Texture2D)) as Texture2D;
+                        cursorImage = Resources.Load("Textures/mano1", typeof(Texture2D)) as Texture2D;
 
                         // Se aumentan los aciertos para saber cuándo terminará el ejercicio
                         aciertosSilabas++;
@@ -456,7 +505,21 @@ public class HandCursor : MonoBehaviour
                     }
                     else
                     {
-                        llamarCorutina = true;
+                        // Se utiliza un índice al azar para asignar una de dos retroalimentaciones de error auditiva.
+                        string audioError = "";
+                        int random = UnityEngine.Random.Range(1, 3);
+                        if (random == 1)
+                            audioError = "Oh-Oh";
+                        else if (random == 2)
+                            audioError = "Ups";
+                        AudioClip audioClip;
+                        audioClip = Resources.Load("Sonidos/EnCasoDeError/" + audioError, typeof(AudioClip)) as AudioClip;
+                        AudioSource sonido = GameObject.Find("sonido").GetComponent<AudioSource>();
+                        reproducirSonido(sonido, audioClip);
+
+                        StartCoroutine("tiempoLibre");
+                        // Se establece en positivo la llamada a una corrutina
+                        //llamarCorutina = true;
                     }
                 }
             }
@@ -472,11 +535,18 @@ public class HandCursor : MonoBehaviour
         yield return null;
     }
 
+    /// <summary>
+    /// Corrutina que permite llamar al método devolverPieza.
+    /// </summary>
     public void devolver_pieza()
     {
         StartCoroutine("devolverPieza");
     }
 
+    /// <summary>
+    /// Método que permite devolver una pieza al tablero de piezas.
+    /// </summary>
+    /// <returns></returns>
     IEnumerator devolverPieza()
     {
         float tiempoRestante = tiempo;
@@ -499,7 +569,7 @@ public class HandCursor : MonoBehaviour
                 imagenSilaba.sprite = Resources.Load("Sprites/" + silabaAgarrada, typeof(Sprite)) as Sprite;
 
                 // Una vez colocada la pieza en su lugar, se devuelve al cursor la imagen de la pluma
-                cursorImage = Resources.Load("Textures/pen", typeof(Texture2D)) as Texture2D;
+                cursorImage = Resources.Load("Textures/mano1", typeof(Texture2D)) as Texture2D;
 
                 // Atributos de semáforo cambian de estado
                 isCursorPen = true;
@@ -515,29 +585,52 @@ public class HandCursor : MonoBehaviour
         yield return null;
     }
 
+    /// <summary>
+    /// Al realizar una acción con el cursor sobre las piezas, se tiene que esperar el tiempo especificado antes de poder realizar
+    /// una nueva acción.
+    /// </summary>
+    /// <returns></returns>
     IEnumerator tiempoLibre()
     {
-        float tiempoDeEspera = 2.0f;
+        float tiempoDeEspera = 1.0f;
         while (tiempoDeEspera > 0)
         {
             Debug.Log("Tiempo de espera para una nueva acción del cursor: " + tiempoDeEspera);
             yield return new WaitForSeconds(1);
             tiempoDeEspera--;
-
         }
         llamarCorutina = true;
         yield return null;
     }
 
+    /// <summary>
+    /// Método que se llama cuando se determina que el jugador ha terminado la actividad.
+    /// </summary>
     public void ganar()
     {
         Debug.Log("Has ganado " + tiempoDeJuego.ToString());
         EstadoJuego.estadoJuego.registrarIntento(tiempoDeJuego, 1);
     }
 
+    /// <summary>
+    /// Método que permite reproducir un audio en tiempo de ejecución de acuerdo a los parámetros recibidos.
+    /// </summary>
+    /// <param name="sonido">Componente que reproducirá el sonido</param>
+    /// <param name="audioClip">Audio que se reproducirá</param>
     public void reproducirSonido(AudioSource sonido, AudioClip audioClip)
     {
         sonido.clip = audioClip;
         sonido.Play();
+    }
+
+    /// <summary>
+    /// Método que permite reproducir un arreglo de texturas con forma de mano para simular una animación con el cursor.
+    /// </summary>
+    /// <param name="framesPerSecond"></param>
+    public void reproducirManoGif()
+    {
+        float index = Time.time * 10.0f;
+        index = index % manos.Length;
+        cursorImage = manos[(int)index];
     }
 }
