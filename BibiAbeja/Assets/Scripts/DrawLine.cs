@@ -4,10 +4,11 @@ using System.Collections.Generic;
 
 public class DrawLine : MonoBehaviour
 {
-    private LineRenderer line;
+    public LineRenderer line;
     private bool isMousePressed;
     private List<Vector3> pointsList;
     private Vector3 mousePos;
+    private bool dejarDeDibujar;
 
     // Structure for line points
     struct myLine
@@ -18,17 +19,34 @@ public class DrawLine : MonoBehaviour
     //	-----------------------------------	
     void Awake()
     {
-        // Create line renderer component and set its property
-        line = gameObject.AddComponent<LineRenderer>();
-        line.material = new Material(Shader.Find("Unlit/Color"));
-        line.material.color = Color.blue;
-        line.SetVertexCount(0);
-        line.SetWidth(10f, 10f);
-        line.SetColors(Color.red, Color.red);
-        line.useWorldSpace = true;
-        isMousePressed = false;
-        pointsList = new List<Vector3>();
-        //		renderer.material.SetTextureOffset(
+        LineRenderer line = gameObject.GetComponent("LineRenderer") as LineRenderer;
+
+        if (line == null)
+        {
+            // Create line renderer component and set its property
+            line = gameObject.AddComponent<LineRenderer>();
+
+            //Debug.Log("Cuantas veces tiene que agregar el componente, sucede en: " + gameObject.name);
+            
+        }
+        if (line != null)
+        {
+            //Debug.Log("Cuantas veces se inicializa las partes del componente, sucede en: " + gameObject.name);
+            line.material = new Material(Shader.Find("Unlit/Color"));
+            line.material.color = Color.blue;
+            line.SetVertexCount(0);
+            line.SetWidth(8f, 8f);
+            line.SetColors(Color.red, Color.red);
+            line.useWorldSpace = true;
+
+            isMousePressed = false;
+            dejarDeDibujar = true;
+            pointsList = new List<Vector3>();
+            //		renderer.material.SetTextureOffset(
+        }
+
+
+
     }
     //	-----------------------------------	
 
@@ -38,30 +56,69 @@ public class DrawLine : MonoBehaviour
     }
     public void Dibujar(Vector3 mousePos)
     {
-        mousePos.z = -50;
-
-        Vector3 a =GameObject.Find("Canvas").transform.TransformVector(mousePos);
-        a.z = -15f;
-
-        if (!pointsList.Contains(a))
+        //Debug.Log("Tratando de dibujar con el drawline: " + gameObject.name);
+        if (dejarDeDibujar == false)
         {
-            pointsList.Add(a);
-            line.SetVertexCount(pointsList.Count);
-            //line.SetPositions(pointsList);
-            line.SetPosition(pointsList.Count - 1, (Vector3)pointsList[pointsList.Count - 1]);
-            //if(isLineCollide())
-            //{
-            //	isMousePressed = false;
-            //	line.SetColors(Color.red, Color.red);
-            //}
-        }
+            //Debug.Log("mouse pos x: " + mousePos.x);
+            //Debug.Log("mouse pos y: " + mousePos.y);
+            //Debug.Log("mouse pos z: " + mousePos.z);
+            mousePos.z = -50;
 
+            Vector3 a = GameObject.Find("Canvas").transform.TransformVector(mousePos);
+            //Debug.Log("a x: " + a.x);
+            //Debug.Log("a y: " + a.y);
+            //Debug.Log("a z: " + a.z);
+
+
+            a.z = -15f;
+            
+            
+            if (!pointsList.Contains(a))
+            {
+                //Debug.Log("points list: " + pointsList.Count + " " +gameObject.name);
+                line = gameObject.GetComponent("LineRenderer") as LineRenderer;
+                pointsList.Add(a);
+                line.SetVertexCount(pointsList.Count);
+               
+                line.SetPosition(pointsList.Count - 1, (Vector3)pointsList[pointsList.Count - 1]);
+                //if(isLineCollide())
+                //{
+                //	isMousePressed = false;
+                //	line.SetColors(Color.red, Color.red);
+                //}
+
+            }
+        }
+        
+
+    }
+
+    public bool getDejarDeDibujar()
+    {
+        return dejarDeDibujar;
+    }
+
+    public void Alto()
+    {
+        Invoke("AltoD", (float).3);
+    }
+
+    public void AltoD()
+    {
+        dejarDeDibujar = true;
+    }
+
+    public void Seguir()
+    {
+        dejarDeDibujar = false;
+        Debug.Log("El objeto: " + gameObject.name + "ya llamo a Seguir(), deberia de poder dibujar ahora");
     }
 
     public void Redo()
     {
         // If mouse button down, remove old line and set its color to green
         isMousePressed = true;
+        line = gameObject.GetComponent("LineRenderer") as LineRenderer;
         line.SetVertexCount(0);
         pointsList.RemoveRange(0, pointsList.Count);
         line.SetColors(Color.green, Color.green);

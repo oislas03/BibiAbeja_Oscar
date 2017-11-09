@@ -15,6 +15,9 @@ public class Puntos : MonoBehaviour {
     
     
     public int ID;
+    private ParticleSystem PS;
+    
+
     /* Esto es un delegate-event, básicamente es el mecanismo con el que se comunicará al
      * observador. Mientras el método del observador tenga las mismas especificaciones 
      * (Que regresa y cuantos parametros tiene, y se refiera al mismo evento), va a poder
@@ -23,13 +26,7 @@ public class Puntos : MonoBehaviour {
     //public delegate void JugadorEmpiezaDibujar(int id);
     //public static event JugadorEmpiezaDibujar Contacto;
 
-    //Planeo hacer que este metodo señale el siguiente punto a ser conectado, 
-    //Pero todavía falta para eso
-    void Highlight()
-    {
-
-    }
-
+  
     /* Método que viene consigo los GameObjects con collider. Registra el primer cuadro 
      * donde el mouse entra en contacto con el GameObject.
      * 
@@ -44,6 +41,32 @@ public class Puntos : MonoBehaviour {
     //        Contacto(ID);
     //    }
     //}
+    void Awake()
+    {
+        PS = gameObject.GetComponent("ParticleSystem") as ParticleSystem;
+        var em = PS.emission;
+        em.enabled = false;
+    }
+
+    void Start()
+    {
+    
+
+    }
+
+    public void PSEnableEmission()
+    {
+
+        var em = PS.emission;
+        em.enabled = true;
+    }
+
+    public void PSDisableEmission()
+    {
+        var em = PS.emission;
+        em.enabled = false;
+    }
+    
 
     //public void contacto()
     //{

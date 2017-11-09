@@ -5,20 +5,23 @@ using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
 
-public class cambiarEscena : MonoBehaviour {
+public class cambiarEscena : MonoBehaviour
+{
 
-	// Use this for initialization
-	void Start () {
-		
-	}
-	
-	// Update is called once per frame
-	void Update () {
-		
-	}
+    // Use this for initialization
+    void Start()
+    {
+
+    }
+
+    // Update is called once per frame
+    void Update()
+    {
+
+    }
 
     private void OnMouseDown()
-        
+
     {
 
         GetComponent<AudioSource>().Play();
@@ -43,20 +46,21 @@ public class cambiarEscena : MonoBehaviour {
 
                 Application.Quit();
             }
-            else {
+            else
+            {
 
                 sceneName = "story";
 
                 SceneManager.LoadScene(sceneName);
             }
-            
+
 
 
         }
-       else  if (nameScene.Equals("seleccionarUsuario"))
+        else if (nameScene.Equals("seleccionarUsuario"))
         {
-            sceneName = btnName.Equals("btnNuevo") ? "escribirNombre" : btnName.Equals("btnSalir") ?"Main": btnName.Equals("btnCargar")? "eligeNivel" : "Main";
-            
+            sceneName = btnName.Equals("btnNuevo") ? "escribirNombre" : btnName.Equals("btnSalir") ? "Main" : btnName.Equals("btnCargar") ? "eligeNivel" : "Main";
+
             SceneManager.LoadScene(sceneName);
 
 
@@ -65,7 +69,8 @@ public class cambiarEscena : MonoBehaviour {
         {
             sceneName = btnName.Equals("btnAceptar") ? "eligeNivel" : btnName.Equals("btnSalir") ? "Main" : "Main";
 
-            if (btnName.Equals("btnAceptar")) {
+            if (btnName.Equals("btnAceptar"))
+            {
                 string nin = GameObject.Find("nombreReal").GetComponent<Text>().text;
                 EstadoJuego.estadoJuego.guardarNuevo(nin);
             }
@@ -76,7 +81,7 @@ public class cambiarEscena : MonoBehaviour {
         }
         else if (nameScene.Equals("eligeTema"))
         {
-            sceneName = btnName.Equals("btnSalir") ? "Main"  : btnName.Equals("btnFotos")?"verFotos":"Main";
+            sceneName = btnName.Equals("btnSalir") ? "Main" : btnName.Equals("btnFotos") ? "verFotos" : "Main";
 
             SceneManager.LoadScene(sceneName);
 
@@ -112,7 +117,7 @@ public class cambiarEscena : MonoBehaviour {
                     break;
             }
 
-            sceneName= btnName.Equals("btnSalir") ? "Main" : "eligeTema";
+            sceneName = btnName.Equals("btnSalir") ? "Main" : "eligeTema";
             SceneManager.LoadScene(sceneName);
 
         }
@@ -133,9 +138,9 @@ public class cambiarEscena : MonoBehaviour {
                 EstadoJuego.estadoJuego.setPalabra(EstadoJuego.estadoJuego.obtenerPalabraSiguiente());
                 sceneName = "paso 1";
             }
-            else {
+            else
+            {
                 sceneName = btnName.Equals("repetir") ? "paso 1" : btnName.Equals("volver") ? "eligeTema" : "eligeTema";
-
             }
 
             SceneManager.LoadScene(sceneName);
