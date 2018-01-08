@@ -6,9 +6,6 @@ public class AspectUtility : MonoBehaviour {
 	static float wantedAspectRatio;
 	static Camera cam;
 	static Camera backgroundCam;
-    //private PXCMSenseManager sm;
-    //private PXCMHandCursorModule cursorModule;
-    //private PXCMCursorConfiguration cursorConfig;
 
     void Awake () {
 		cam = GetComponent<Camera>();
@@ -21,34 +18,8 @@ public class AspectUtility : MonoBehaviour {
 		}
 		wantedAspectRatio = _wantedAspectRatio;
 		SetCamera();
-        //ConfigureRealSense();
 	}
-    /*
-    public PXCMSenseManager ConfigureRealSense()
-    {
-        // Create an instance of the SenseManager
-        sm = PXCMSenseManager.CreateInstance();
 
-        // Enable cursor tracking
-        sm.EnableHandCursor();
-
-        // Get an instance of the hand cursor module
-        cursorModule = sm.QueryHandCursor();
-
-        // Get an instance of the cursor configuration
-        cursorConfig = cursorModule.CreateActiveConfiguration();
-
-        // Make configuration changes and apply them
-        cursorConfig.EnableEngagement(true);
-        cursorConfig.EnableAllGestures();
-        cursorConfig.EnableAllAlerts();
-        cursorConfig.ApplyChanges();
-
-        // Initialize the SenseManager pipeline
-        sm.Init();
-        return sm;
-    }
-    */
     public static void SetCamera () {
 		float currentAspectRatio = (float)Screen.width / Screen.height;
 		// If the current aspect ratio is already approximately equal to the desired aspect ratio,

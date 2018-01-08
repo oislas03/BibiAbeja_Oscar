@@ -197,13 +197,17 @@ public class HandCursor : MonoBehaviour
 
                 //Debug.Log("Resolución actual: " + Screen.currentResolution.height + ", " + Screen.currentResolution.width);
 
-                coordinates2d.x = (adaptivePoints.x * Screen.currentResolution.width);
-                coordinates2d.y = (adaptivePoints.y * Screen.currentResolution.height);
+                int resWidth = Screen.currentResolution.width;
+                int resHeight = Screen.currentResolution.height;
 
+                coordinates2d.x = (adaptivePoints.x * resWidth);
+                coordinates2d.y = (adaptivePoints.y * resHeight);
+                Debug.Log("Coordinates2d: " + coordinates2d.x + " " + coordinates2d.y);
                 mousePos = new Vector3(coordinates2d.x, coordinates2d.y, 20);
                 //mousePos = new Vector3(coordinates2d.x, coordinates2d.y, 20);
 
-                //v3 = Camera.main.WorldToScreenPoint(mousePos);
+                v3 = Camera.main.WorldToScreenPoint(mousePos);
+                Debug.Log("MousePos: " + mousePos); 
             }
             else
             {
@@ -219,10 +223,11 @@ public class HandCursor : MonoBehaviour
 
     void OnGUI()
     {
-        //mousePos = Camera.main.ScreenToWorldPoint(v3);
+        mousePos = Camera.main.ScreenToWorldPoint(v3);
+        
 
         // Cuadrado y posición en la pantalla que ayuda a dibujar el lápiz.
-        Rect posa = new Rect(mousePos.x, Screen.currentResolution.height - mousePos.y, cursorImage.width, cursorImage.height);
+        Rect posa = new Rect(mousePos.x, mousePos.y, cursorImage.width, cursorImage.height);
         GUI.Label(posa, cursorImage);
 
         ray = Camera.main.ScreenPointToRay(mousePos);

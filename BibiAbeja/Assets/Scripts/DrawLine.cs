@@ -59,25 +59,17 @@ public class DrawLine : MonoBehaviour
         //Debug.Log("Tratando de dibujar con el drawline: " + gameObject.name);
         if (dejarDeDibujar == false)
         {
-            //Debug.Log("mouse pos x: " + mousePos.x);
-            //Debug.Log("mouse pos y: " + mousePos.y);
-            //Debug.Log("mouse pos z: " + mousePos.z);
-            mousePos.z = -50;
-
+            
+            mousePos.z = -15;
+            Debug.Log("MousePos en drawLine: " + mousePos);
             Vector3 a = GameObject.Find("Canvas").transform.TransformVector(mousePos);
-            //Debug.Log("a x: " + a.x);
-            //Debug.Log("a y: " + a.y);
-            //Debug.Log("a z: " + a.z);
-
-
             a.z = -15f;
-            
-            
-            if (!pointsList.Contains(a))
+
+            if (!pointsList.Contains(mousePos))
             {
                 //Debug.Log("points list: " + pointsList.Count + " " +gameObject.name);
                 line = gameObject.GetComponent("LineRenderer") as LineRenderer;
-                pointsList.Add(a);
+                pointsList.Add(mousePos);
                 line.SetVertexCount(pointsList.Count);
                
                 line.SetPosition(pointsList.Count - 1, (Vector3)pointsList[pointsList.Count - 1]);

@@ -142,7 +142,7 @@ public class Checador : MonoBehaviour
         reversa = false;
         segundoContacto = false;
         ultimoPunto = puntos.Length;
-
+        GameObject.Find("DrawLine").GetComponent<DrawLine>().Seguir();
 
 
         //Lo que hace que aparezcan y desaparezcan los cuadros y el mensaje inmediato

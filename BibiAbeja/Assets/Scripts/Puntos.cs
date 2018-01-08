@@ -44,8 +44,8 @@ public class Puntos : MonoBehaviour {
     void Awake()
     {
         PS = gameObject.GetComponent("ParticleSystem") as ParticleSystem;
-        var em = PS.emission;
-        em.enabled = false;
+        //var em = PS.emission;
+        //em.enabled = false;
     }
 
     void Start()
