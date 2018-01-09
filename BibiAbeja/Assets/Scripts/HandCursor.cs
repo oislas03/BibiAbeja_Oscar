@@ -18,6 +18,7 @@ public class HandCursor : MonoBehaviour
     private PXCMCursorData.GestureData gestureData;
     private PXCMPoint3DF32 adaptivePoints;
     private PXCMPoint3DF32 coordinates2d;
+    private PXCMPoint3DF32 imagePoint; // prueba de concepto de un método nuevo ----------------------------------------
     private Ray ray;
     private RaycastHit hit;
     private bool isCursorPen = true;
@@ -190,23 +191,29 @@ public class HandCursor : MonoBehaviour
                                            0,
                                            out iCursor);
 
-                adaptivePoints = iCursor.QueryAdaptivePoint();
-
                 // Retrieve controlling body side (i.e., left or right hand)
                 bodySide = iCursor.QueryBodySide();
 
                 //Debug.Log("Resolución actual: " + Screen.currentResolution.height + ", " + Screen.currentResolution.width);
 
-                int resWidth = Screen.currentResolution.width;
-                int resHeight = Screen.currentResolution.height;
+                int resWidth = Screen.width;
+                int resHeight = Screen.height;
 
-                coordinates2d.x = (adaptivePoints.x * resWidth);
-                coordinates2d.y = (adaptivePoints.y * resHeight);
-                Debug.Log("Coordinates2d: " + coordinates2d.x + " " + coordinates2d.y);
+                adaptivePoints = iCursor.QueryAdaptivePoint();
+                imagePoint = iCursor.QueryCursorPointImage();
+
+                //coordinates2d.x = (adaptivePoints.x * resWidth);
+                //coordinates2d.y = (adaptivePoints.y * resHeight);
+                Debug.Log("Image point: " + imagePoint.x + ", " + imagePoint.y);
+                coordinates2d.x = imagePoint.x;
+                coordinates2d.y = Screen.height - imagePoint.y;
+
+                Debug.Log("Current resolution: " + resWidth + "x" + resHeight);
+                Debug.Log("Coordinates2d: " + coordinates2d.x + ", " + coordinates2d.y);
+
                 mousePos = new Vector3(coordinates2d.x, coordinates2d.y, 20);
-                //mousePos = new Vector3(coordinates2d.x, coordinates2d.y, 20);
-
-                v3 = Camera.main.WorldToScreenPoint(mousePos);
+                
+                //v3 = Camera.main.WorldToScreenPoint(mousePos);
                 Debug.Log("MousePos: " + mousePos); 
             }
             else
@@ -223,11 +230,10 @@ public class HandCursor : MonoBehaviour
 
     void OnGUI()
     {
-        mousePos = Camera.main.ScreenToWorldPoint(v3);
-        
+        mousePos = Camera.main.WorldToScreenPoint(imagePoint);
 
         // Cuadrado y posición en la pantalla que ayuda a dibujar el lápiz.
-        Rect posa = new Rect(mousePos.x, mousePos.y, cursorImage.width, cursorImage.height);
+        Rect posa = new Rect(mousePos.x + 2, Screen.height - mousePos.y - 23, cursorImage.width, cursorImage.height);
         GUI.Label(posa, cursorImage);
 
         ray = Camera.main.ScreenPointToRay(mousePos);
@@ -255,7 +261,7 @@ public class HandCursor : MonoBehaviour
                 }
                 if (hit.collider.tag == "areaDibujable")
                 {
-                    GameObject.Find("DrawLine").GetComponent<DrawLine>().Dibujar(mousePos);
+                    GameObject.Find("DrawLine").GetComponent<DrawLine>().Dibujar(coordinates2d);
                 }
             } else if(pasoNombre == "paso 2")
             {
