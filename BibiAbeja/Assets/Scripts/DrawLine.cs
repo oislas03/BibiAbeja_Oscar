@@ -62,7 +62,7 @@ public class DrawLine : MonoBehaviour
             mousePos.x = mousePos.x;
             mousePos.y = Screen.height - mousePos.y;
             mousePos.z = -15;
-            Debug.Log("MousePos en drawLine: " + mousePos);
+            //Debug.Log("MousePos en drawLine: " + mousePos);
             Vector3 a = GameObject.Find("Canvas").transform.TransformVector(mousePos);
             a.z = -15f;
 

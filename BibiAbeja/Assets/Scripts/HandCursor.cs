@@ -151,6 +151,7 @@ public class HandCursor : MonoBehaviour
             cursorData = cursorModule.CreateOutput();
             adaptivePoints = new PXCMPoint3DF32();
             coordinates2d = new PXCMPoint3DF32();
+            imagePoint = new PXCMPoint3DF32();
             PXCMCursorData.BodySideType bodySide;
 
             cursorData.Update();
@@ -204,17 +205,20 @@ public class HandCursor : MonoBehaviour
 
                 //coordinates2d.x = (adaptivePoints.x * resWidth);
                 //coordinates2d.y = (adaptivePoints.y * resHeight);
-                Debug.Log("Image point: " + imagePoint.x + ", " + imagePoint.y);
+                //Debug.Log("Image point: " + imagePoint.x + ", " + imagePoint.y);
                 coordinates2d.x = imagePoint.x;
                 coordinates2d.y = Screen.height - imagePoint.y;
 
-                Debug.Log("Current resolution: " + resWidth + "x" + resHeight);
-                Debug.Log("Coordinates2d: " + coordinates2d.x + ", " + coordinates2d.y);
+                //Debug.Log("Current resolution: " + resWidth + "x" + resHeight);
+                //Debug.Log("Coordinates2d: " + coordinates2d.x + ", " + coordinates2d.y);
 
                 mousePos = new Vector3(coordinates2d.x, coordinates2d.y, 20);
-                
+
+                //v3 = Camera.main.WorldToScreenPoint(imagePoint);
+
+                mousePos = Camera.main.WorldToScreenPoint(imagePoint);
                 //v3 = Camera.main.WorldToScreenPoint(mousePos);
-                Debug.Log("MousePos: " + mousePos); 
+                //Debug.Log("MousePos: " + mousePos); 
             }
             else
             {
@@ -230,7 +234,7 @@ public class HandCursor : MonoBehaviour
 
     void OnGUI()
     {
-        mousePos = Camera.main.WorldToScreenPoint(imagePoint);
+        //mousePos = Camera.main.WorldToScreenPoint(imagePoint);
 
         // Cuadrado y posición en la pantalla que ayuda a dibujar el lápiz.
         Rect posa = new Rect(mousePos.x + 2, Screen.height - mousePos.y - 23, cursorImage.width, cursorImage.height);
@@ -283,7 +287,7 @@ public class HandCursor : MonoBehaviour
                 }
                 if (hit.collider.tag == "areaDibujable")
                 {
-                    GameObject.Find("DrawLine").GetComponent<DrawLine>().Dibujar(mousePos);
+                    GameObject.Find("DrawLine").GetComponent<DrawLine>().Dibujar(coordinates2d);
                 }
             }
 
