@@ -11,15 +11,18 @@ using UnityEngine.UI;
 
 
 
-public class conexionDB  {
+public class conexionDB
+{
 
     string conn;
 
-    public conexionDB(){
-                conn = "URI=file:" + Application.dataPath + "/StreamingAssets/BibiAbejaBD.db";
-                        }
+    public conexionDB()
+    {
+        conn = "URI=file:" + Application.dataPath + "/StreamingAssets/BibiAbejaBD.db";
+    }
 
-    public  List<Player> obtenerJugadores() {
+    public List<Player> obtenerJugadores()
+    {
 
         List<Player> jugadores = new List<Player>();
         Player jugador = new Player();
@@ -37,7 +40,7 @@ public class conexionDB  {
             string name = reader.GetString(0);
             int id = reader.GetInt32(1);
 
-            jugador = new Player(id,name);
+            jugador = new Player(id, name);
             jugadores.Add(jugador);
         }
         reader.Close();
@@ -64,10 +67,10 @@ public class conexionDB  {
 
 
         IDbCommand dbcmd = dbconn.CreateCommand();
-        string sqlQuery = "INSERT INTO Usuarios (nombre)  VALUES ('"+nombre+"')"; // FIXED
+        string sqlQuery = "INSERT INTO Usuarios (nombre)  VALUES ('" + nombre + "')"; // FIXED
         dbcmd.CommandText = sqlQuery;
         dbcmd.ExecuteNonQuery();
-     dbcmd.Dispose();
+        dbcmd.Dispose();
         dbcmd = null;
         dbconn.Close();
         dbconn = null;
@@ -77,19 +80,19 @@ public class conexionDB  {
     public List<String> obtenerPalabras(string tema)
     {
 
-        List<String> palabras= new List<String>();
+        List<String> palabras = new List<String>();
         IDbConnection dbconn;
         dbconn = (IDbConnection)new SqliteConnection(conn);
 
         dbconn.Open(); //Open connection to the database.
 
         IDbCommand dbcmd = dbconn.CreateCommand();
-        string sqlQuery = "select nombre from Palabras where  tema='"+tema+"'";
+        string sqlQuery = "select nombre from Palabras where  tema='" + tema + "'";
         dbcmd.CommandText = sqlQuery;
         IDataReader reader = dbcmd.ExecuteReader();
         while (reader.Read())
         {
-            string palabra= reader.GetString(0);
+            string palabra = reader.GetString(0);
 
             palabras.Add(palabra);
         }
@@ -127,7 +130,7 @@ public class conexionDB  {
 
             imagenes.Add(new Imagen(id, numParte, nombre, path));
         }
- 
+
         reader.Close();
         reader = null;
         dbcmd.Dispose();
@@ -140,7 +143,7 @@ public class conexionDB  {
 
 
 
-    public int obtenerIndiceMaximo(int idUsuario, string palabra)
+    public int obtenerIndiceMaximo(int idUsuario, string palabra, int nivel)
     {
         int indiceMaximo = 0;
         IDbConnection dbconn;
@@ -149,7 +152,7 @@ public class conexionDB  {
         dbconn.Open(); //Open connection to the database.
 
         IDbCommand dbcmd = dbconn.CreateCommand();
-        string sqlQuery = "SELECT COUNT (id) FROM Intentos WHERE idUsuario = "+idUsuario+" AND palabra = '"+palabra+"'";
+        string sqlQuery = "SELECT COUNT (id) FROM Intentos WHERE idUsuario = " + idUsuario + " AND palabra = '" + palabra + "' AND nivel = " + nivel;
         dbcmd.CommandText = sqlQuery;
         IDataReader reader = dbcmd.ExecuteReader();
         while (reader.Read())
@@ -177,7 +180,7 @@ public class conexionDB  {
         dbconn.Open(); //Open connection to the database.
 
         IDbCommand dbcmd = dbconn.CreateCommand();
-        string sqlQuery = "select Imagenes.Id, Imagenes.numParte,  Imagenes.nombre, Imagenes.path from Imagenes JOIN ImagenesDesbloqueadas  ON (Imagenes.id = ImagenesDesbloqueadas.idImagen)AND (Imagenes.nombre='"+palabra+"') AND(ImagenesDesbloqueadas.idUsuario='"+idUsuario+"')";
+        string sqlQuery = "select Imagenes.Id, Imagenes.numParte,  Imagenes.nombre, Imagenes.path from Imagenes JOIN ImagenesDesbloqueadas  ON (Imagenes.id = ImagenesDesbloqueadas.idImagen)AND (Imagenes.nombre='" + palabra + "') AND(ImagenesDesbloqueadas.idUsuario='" + idUsuario + "')";
         dbcmd.CommandText = sqlQuery;
         IDataReader reader = dbcmd.ExecuteReader();
         while (reader.Read())
@@ -210,7 +213,7 @@ public class conexionDB  {
         dbconn.Open(); //Open connection to the database.
 
         IDbCommand dbcmd = dbconn.CreateCommand();
-        string sqlQuery = "select Imagenes.id, Imagenes.numParte, Imagenes.nombre, Imagenes.path from Imagenes JOIN ImagenesDesbloqueadas ON( Imagenes.id= ImagenesDesbloqueadas.idImagen) AND (ImagenesDesbloqueadas.idUsuario="+idUsuario+")";
+        string sqlQuery = "select Imagenes.id, Imagenes.numParte, Imagenes.nombre, Imagenes.path from Imagenes JOIN ImagenesDesbloqueadas ON( Imagenes.id= ImagenesDesbloqueadas.idImagen) AND (ImagenesDesbloqueadas.idUsuario=" + idUsuario + ")";
         dbcmd.CommandText = sqlQuery;
         IDataReader reader = dbcmd.ExecuteReader();
         while (reader.Read())
@@ -244,8 +247,8 @@ public class conexionDB  {
         dbconn.Open(); //Open connection to the database.
 
         IDbCommand dbcmd = dbconn.CreateCommand();
-        string sqlQuery = "INSERT INTO ImagenesDesbloqueadas (idUsuario,idImagen)  VALUES ('"+idUsuario+ "',(1+(select "
-            + "CAST(  CASE  WHEN MAX(idImagen) IS NOT NULL THEN Max(idImagen)     ELSE  (select Min(id) from Imagenes where nombre= '"+nombre+"')-1 END AS bit) as MAXIMO "
+        string sqlQuery = "INSERT INTO ImagenesDesbloqueadas (idUsuario,idImagen)  VALUES ('" + idUsuario + "',(1+(select "
+            + "CAST(  CASE  WHEN MAX(idImagen) IS NOT NULL THEN Max(idImagen)     ELSE  (select Min(id) from Imagenes where nombre= '" + nombre + "')-1 END AS bit) as MAXIMO "
             + "from Imagenes JOIN ImagenesDesbloqueadas  ON (Imagenes.id = ImagenesDesbloqueadas.idImagen)AND (Imagenes.nombre='" + nombre + "') AND(ImagenesDesbloqueadas.idUsuario='" + idUsuario + "'))))"; // FIXED
         dbcmd.CommandText = sqlQuery;
         dbcmd.ExecuteNonQuery();
@@ -257,17 +260,20 @@ public class conexionDB  {
     }
 
 
-    public void guardarIntento(int idUsuario,string palabra,float duracion, string path, int exitoso, int nivel)
+    public void guardarIntento(int idUsuario, string palabra, float duracion, string path, int exitoso, int nivel, String[] datos)
     {
 
         IDbConnection dbconn;
-        string fecha = System.DateTime.Now.ToString();
+        String fecha = datos[0];
+        String hora = datos[1];
+        String turno = datos[2];
         dbconn = (IDbConnection)new SqliteConnection(conn);
 
         dbconn.Open(); //Open connection to the database.
 
+
         IDbCommand dbcmd = dbconn.CreateCommand();
-        string sqlQuery = "insert into Intentos (idUsuario, timestamp, tiempoDuracion, trazoPath, palabra, exitoso, nivel) VALUES ("+idUsuario+",'"+fecha+"',"+duracion+",'"+path+"','"+palabra+"',"+exitoso+"," + nivel + ")"; // FIXED
+        string sqlQuery = "insert into Intentos (idUsuario, tiempoDuracion, trazoPath, palabra, exitoso, nivel, fecha, hora, turno) VALUES (" + idUsuario + "," + duracion + ",'" + path + "','" + palabra + "'," + exitoso + "," + nivel + ",' " + fecha + "', '" + hora + "', '" + turno + "')"; // FIXED
         dbcmd.CommandText = sqlQuery;
         dbcmd.ExecuteNonQuery();
         dbcmd.Dispose();

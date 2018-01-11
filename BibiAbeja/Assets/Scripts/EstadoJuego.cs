@@ -93,25 +93,22 @@ public class EstadoJuego : MonoBehaviour {
 
     public void registrarIntento(float duracion, int exitoso)
     {
-
-        
-        //this.ActivePlayer = players.Find(item => item.id == this.ActivePlayer.id + 0);
-        //this.palabra = "cuadrado";
-
-        int indiceM = conexion.obtenerIndiceMaximo(this.ActivePlayer.id, this.palabra);
-        this.path = nivel<=2?this.ActivePlayer.id + "_" + this.palabra + "_" + (indiceM+1) + ".png":"";
+        int indiceM = conexion.obtenerIndiceMaximo(this.ActivePlayer.id, this.palabra, this.nivel);
+        this.path = nivel <= 2 ? this.ActivePlayer.id + "_" + this.palabra + "_" + (indiceM + 1) + "_" + "Nivel" + this.nivel + ".png" : "";
         Debug.Log(this.ActivePlayer.id + this.palabra + duracion + path + exitoso);
 
         int playerActive = ActivePlayer.id;
 
-        conexion.guardarIntento(this.ActivePlayer.id, this.palabra, duracion, path, exitoso, this.nivel);
 
-        if (nivel == 1 || nivel == 2) {
+        String[] datos = this.obtenerSilabasPalabra(System.DateTime.Now.ToString());
+
+
+        conexion.guardarIntento(this.ActivePlayer.id, this.palabra, duracion, path, exitoso, this.nivel, datos);
+
+        if (nivel == 1 || nivel == 2)
+        {
             uploader.StartCoroutine("UploadPNG");
-
-
         }
-
     }
 
 
